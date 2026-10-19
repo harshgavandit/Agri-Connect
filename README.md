@@ -123,7 +123,7 @@ Never commit `.env`, credentials, private documents, database exports, session d
 The tracked `vercel.json` configures a production build, `dist/public` static output, an API function in `api/index.ts`, and client-side route fallback.
 
 1. Import this repository in Vercel and select the branch to deploy.
-2. Use the tracked build settings: initialise the separate deployment database, then run `npm run build`; static output is `dist/public`. Fresh setup uses `DATABASE_URL_UNPOOLED` when available.
+2. Use the tracked build settings: `npm run build`; static output is `dist/public`. Initialise a new database separately with `npm run db:setup:fresh`, or restore an existing installation privately before switching its connection. Fresh setup uses `DATABASE_URL_UNPOOLED` when available.
 3. Configure a separate hosted PostgreSQL database reachable from Vercel. A `localhost` database URL cannot work from a hosted function.
 4. Initialise the deployment database and add required environment variables privately in Vercel.
 5. Keep payments in mock mode until provider configuration and the complete sandbox flow have been verified.
@@ -135,7 +135,7 @@ The data-centre backup screens include prototype behaviour; they do not establis
 
 ### Public deployment configuration
 
-The public instance uses a separate hosted database with no copied local users or orders. Google sign-in, Stripe test keys, Razorpay test keys, Vonage SMS, and Turnstile configuration are supplied privately through Vercel. Domain allowlists and provider callback configuration must be completed in the corresponding provider consoles before those external flows can be verified. Blank AI provider keys are not a configured AI service.
+The public instance uses a separate hosted database. Deploying source code or copying environment variables does not copy local database records: an existing installation needs a private database migration that preserves ownership, permissions, and encryption compatibility. Production builds do not run data migrations automatically. Google sign-in, Stripe test keys, Razorpay test keys, Vonage SMS, and Turnstile configuration are supplied privately through Vercel. Domain allowlists and provider callback configuration must be completed in the corresponding provider consoles before those external flows can be verified. Blank AI provider keys are not a configured AI service.
 
 Payment execution remains in `PAYMENTS_MODE=mock`. The internal mock adapter intentionally rejects checkout in production, so stored test gateway credentials do not activate payment processing. A later, explicitly authorised sandbox activation is required to exercise Stripe or Razorpay on the hosted site. Student test access and E2E bypass routes remain disabled.
 

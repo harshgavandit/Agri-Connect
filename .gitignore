@@ -1,0 +1,25 @@
+node_modules
+dist
+.DS_Store
+backend/public
+vite.config.ts.*
+*.tar.gz
+log-query.db
+.local/state/
+.config/
+logs/
+test-results/
+playwright-report/
+.data/
+.npm-cache/
+
+# Local configuration, credentials, and generated reports
+.env
+.env.*
+!.env.example
+.vercel/
+.release/
+*.log
+*.tsbuildinfo
+security-scans/
+.codex-worktrees/

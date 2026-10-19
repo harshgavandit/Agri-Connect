@@ -1,0 +1,12 @@
+.git
+.env
+.env.*
+.agents
+.codex-worktrees
+.release
+AgriConnect-Agents_Guide
+security-scans
+test-results
+playwright-report
+tests
+*.log

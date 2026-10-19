@@ -14,6 +14,7 @@ import { registerCurrencyRoutes } from "./currency/routes";
 import { ensureBootstrapSuperAdmins } from "./organisations/repository";
 import { opportunityMonitor } from "./regional-marketplace/opportunity-monitor";
 import { getTurnstileSiteKey } from "./security/turnstile";
+import { pool } from "./config/db";
 
 const app = express();
 const httpServer = createServer(app);
@@ -213,6 +214,17 @@ app.use(
   },
 );
 
+// Local encrypted files need a durable storage adapter before they can be
+// accepted by an ephemeral hosted function.
+if (isServerless) {
+  app.use("/api/seller/verification/documents", (_req, res) => {
+    res.status(503).json({
+      error: "Verification document storage is not configured for this deployment",
+      code: "DOCUMENT_STORAGE_UNAVAILABLE",
+    });
+  });
+}
+
 app.use(
   "/api/seller/verification/documents",
   express.json({
@@ -283,6 +295,21 @@ export const ready = (async () => {
 
   app.get("/api/health", (_req, res) => {
     res.json({ status: "ok", timestamp: new Date().toISOString() });
+  });
+
+  app.get("/api/ready", async (_req, res) => {
+    res.setHeader("Cache-Control", "no-store");
+    try {
+      const result = await pool.query(`SELECT
+        to_regclass('public.users') IS NOT NULL AND
+        to_regclass('public.sessions') IS NOT NULL AND
+        to_regclass('public.commerce_products') IS NOT NULL AND
+        to_regclass('public.admin_permissions') IS NOT NULL AS ready`);
+      if (!result.rows[0]?.ready) return res.status(503).json({ status: "unavailable", database: "schema_incomplete" });
+      return res.json({ status: "ok", database: "connected", schema: "ready" });
+    } catch {
+      return res.status(503).json({ status: "unavailable", database: "unreachable" });
+    }
   });
 
   app.get("/api/config", (_req, res) => {

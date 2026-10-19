@@ -57,7 +57,7 @@ React uses Wouter for routing, TanStack Query for server state, Tailwind CSS and
 
 ## Run locally
 
-Use Node.js **22.12 or later** and PostgreSQL. The current Vite dependency also supports Node.js 20.19+, but Node.js 22 is the recommended baseline for this release.
+Use Node.js **22.12+ in the Node.js 22 release line** and PostgreSQL. The project pins Node.js 22 for reproducible hosting.
 
 ```bash
 npm ci
@@ -74,10 +74,10 @@ docker compose up -d postgres
 
 The example credentials in that Compose file are for local development. Do not expose that database publicly.
 
-For a new database, initialise the schema before launching. The repository includes both Drizzle models (`shared/models/`) and historical SQL migrations (`database/migrations/`). Read the migration notes below before using an existing database.
+For a new, empty database, initialise the schema and reference data before launching. The setup command journals the historical SQL migrations through `0040`, refuses an unrelated existing database, and can resume its own interrupted setup. Read the migration notes below before using an existing database.
 
 ```bash
-npm run db:push
+npm run db:setup:fresh
 npm run dev
 ```
 
@@ -96,7 +96,7 @@ npm start
 
 - Never run schema synchronisation or historical data migrations against a shared database without reviewing the generated changes and taking a backup.
 - Historical migrations include reference data, cleanup operations, and environment-specific catalogue ownership transitions. In particular, `0041` and `0042` expect an existing account; they are not generic fresh-database setup scripts.
-- A new database does not contain your local users, orders, or sessions. Core marketplace catalogue publication also depends on a configured, eligible catalogue owner; `MVP_CATALOG_OWNER_EMAIL` selects that owner.
+- A new database does not contain your local users, orders, or sessions. Set `CATALOG_SEED_ENABLED=false` to start with an empty catalogue. The optional legacy catalogue seeder requires an existing, eligible owner selected with `MVP_CATALOG_OWNER_EMAIL`; it must not invent verified sellers.
 - Some domain records and demonstration data still use in-process storage. Those records do not have the durability guarantees of the persisted commerce tables.
 
 ## Configuration
@@ -108,6 +108,7 @@ Start with [`.env.example`](.env.example). The preserved [environment guide](Agr
 | Required API runtime | `DATABASE_URL`, `SESSION_SECRET`, `NODE_ENV=production` in production |
 | Canonical URLs and callbacks | `PUBLIC_APP_URL`, `APP_ORIGINS`, `PAYMENT_RETURN_BASE_URL` |
 | Encrypted security data | `APP_ENCRYPTION_KEY` and the seller verification/document encryption keys |
+| Empty fresh catalogue | `CATALOG_SEED_ENABLED=false` |
 | Safe demonstration payments | `PAYMENTS_MODE=mock`, leave `PAYMENTS_ENABLED_PROVIDERS` empty |
 | Optional identity and bot protection | Google client configuration and Cloudflare Turnstile keys |
 | Optional AI | `GEMINI_API_KEY` or `AI_INTEGRATIONS_OPENAI_API_KEY`; provider/model availability must be checked separately |
@@ -120,11 +121,11 @@ Never commit `.env`, credentials, private documents, database exports, session d
 The tracked `vercel.json` configures a production build, `dist/public` static output, an API function in `api/index.ts`, and client-side route fallback.
 
 1. Import this repository in Vercel and select the branch to deploy.
-2. Use the repository's build settings (`npm run build`, output `dist/public`).
+2. Use the tracked build settings: initialise the separate deployment database, then run `npm run build`; static output is `dist/public`. Fresh setup uses `DATABASE_URL_UNPOOLED` when available.
 3. Configure a separate hosted PostgreSQL database reachable from Vercel. A `localhost` database URL cannot work from a hosted function.
 4. Initialise the deployment database and add required environment variables privately in Vercel.
 5. Keep payments in mock mode until provider configuration and the complete sandbox flow have been verified.
-6. Deploy, then verify the homepage, a direct nested route, API responses, and session behaviour.
+6. Deploy, then verify the homepage, a direct nested route, API responses, and session behaviour. `GET /api/ready` checks database connectivity and required schema tables.
 
 **Hosting boundaries:** Vercel functions do not run the application's periodic monitors reliably. This release disables those in-process timers on Vercel; scheduled reconciliation, provider review, maintenance, and opportunity scanning need a separate persistent worker or authenticated scheduled jobs. Seller document uploads currently use filesystem storage and need durable object storage before real verification documents are accepted. Process-local rate limits do not provide a global distributed limit across function instances.
 

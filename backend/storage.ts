@@ -2485,6 +2485,9 @@ class PersistentCommerceStorage extends MemStorage {
   private taxonomyPromise?: Promise<void>;
 
   private async ensureCatalog(): Promise<void> {
+    // Fresh hosted installations can start with an empty catalogue. Keep the
+    // existing local seeder opt-in there without inventing verified sellers.
+    if (process.env.CATALOG_SEED_ENABLED === "false") return;
     if (!this.seedPromise) {
       this.seedPromise = super.getProducts().then((products) => commerceRepository.seedProducts(products));
     }

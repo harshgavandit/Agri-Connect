@@ -1,10 +1,8 @@
 import { drizzle } from "drizzle-orm/node-postgres";
-import { createRequire } from "module";
-import path from "path";
+import pg from "pg";
 import * as schema from "@shared/schema";
 
-const require = createRequire(path.join(process.cwd(), "package.json"));
-const { Pool } = require("pg") as { Pool: new (config: { connectionString: string; ssl: false | { rejectUnauthorized: boolean } }) => any };
+const { Pool } = pg as { Pool: new (config: { connectionString: string; ssl: false | { rejectUnauthorized: boolean } }) => any };
 
 if (!process.env.DATABASE_URL) {
   throw new Error("DATABASE_URL environment variable is required");

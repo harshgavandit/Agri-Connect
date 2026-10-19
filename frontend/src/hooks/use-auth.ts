@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { apiRequest, getQueryFn } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 import type { User, UpdateProfileInput } from "@shared/schema";
 
 type LoginInput = {
@@ -28,6 +29,7 @@ type GoogleLoginInput = {
 export function useAuth() {
   const queryClient = useQueryClient();
   const [, setLocation] = useLocation();
+  const { toast } = useToast();
 
   const { data: user, isLoading } = useQuery<User | null>({
     queryKey: ["/api/auth/user"],
@@ -124,8 +126,18 @@ export function useAuth() {
   });
 
   const logout = async () => {
-    await apiRequest("POST", "/api/auth/logout", {});
+    try {
+      await apiRequest("POST", "/api/auth/logout", {});
+    } catch {
+      toast({
+        title: "Could not sign out",
+        description: "The server could not complete sign-out. Please try again.",
+        variant: "destructive",
+      });
+      return;
+    }
     queryClient.setQueryData(["/api/auth/user"], null);
+    queryClient.removeQueries({ queryKey: ["/api/admin/access"] });
     queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
     setLocation("/login");
   };

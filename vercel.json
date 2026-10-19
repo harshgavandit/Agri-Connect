@@ -5,7 +5,9 @@
   "outputDirectory": "dist/public",
   "functions": {
     "api/index.ts": {
-      "maxDuration": 60
+      "maxDuration": 60,
+      "includeFiles": "dist/index.cjs",
+      "excludeFiles": "{frontend/**,dist/public/**,AgriConnect-Agents_Guide/**}"
     }
   },
   "rewrites": [

@@ -361,7 +361,9 @@ export function registerDietaryRoutes(
       // hardcoded UUID or from a product snapshot.
       const seller = await authStorage.getUserByEmail(configuredCatalogOwnerEmail());
       if (!seller || seller.accountStatus !== "active" || (seller.role !== "farmer" && !seller.sellerEnabled)) {
-        return res.status(503).json({ error: "The configured dietary-plan seller is unavailable" });
+        // A fresh catalogue may not have an eligible seller yet. This is an
+        // empty result, while database and other service failures remain errors.
+        return res.json(null);
       }
       const sellerId = seller.id;
 

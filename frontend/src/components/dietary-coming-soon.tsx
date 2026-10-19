@@ -159,7 +159,7 @@ export function DietaryComingSoon({
   }, [currentSection, availableSections]);
 
   // Fetch real database-backed plan from backend API
-  const { data: plan, isLoading, isError } = useQuery<DietaryPlanData>({
+  const { data: plan, isLoading, isError } = useQuery<DietaryPlanData | null>({
     queryKey: [`/api/dietary/plans?subcategory=${effectiveSubcategory}`],
     staleTime: 30_000,
   });
@@ -281,9 +281,13 @@ export function DietaryComingSoon({
     return (
       <div className="h-full grid place-items-center bg-[#f8fafc] dark:bg-background px-6 text-center">
         <div>
-          <h2 className="font-black text-lg">Dietary plan unavailable</h2>
+          <h2 className="font-black text-lg">
+            {isError ? "Unable to load dietary plans" : "No dietary plans available yet"}
+          </h2>
           <p className="mt-2 text-sm text-muted-foreground">
-            A real verified seller and eligible database products are required to display this plan.
+            {isError
+              ? "Please try again in a moment."
+              : "Explore our other categories while sellers prepare their dietary plans."}
           </p>
         </div>
       </div>

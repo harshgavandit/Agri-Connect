@@ -137,7 +137,9 @@ The data-centre backup screens include prototype behaviour; they do not establis
 
 The public instance uses a separate hosted database. Deploying source code or copying environment variables does not copy local database records: an existing installation needs a private database migration that preserves ownership, permissions, and encryption compatibility. Production builds do not run data migrations automatically. Google sign-in, Stripe test keys, Razorpay test keys, Vonage SMS, and Turnstile configuration are supplied privately through Vercel. Domain allowlists and provider callback configuration must be completed in the corresponding provider consoles before those external flows can be verified. Blank AI provider keys are not a configured AI service.
 
-Payment execution remains in `PAYMENTS_MODE=mock`. The internal mock adapter intentionally rejects checkout in production, so stored test gateway credentials do not activate payment processing. A later, explicitly authorised sandbox activation is required to exercise Stripe or Razorpay on the hosted site. Student test access and E2E bypass routes remain disabled.
+The hosted checkout uses `PAYMENTS_MODE=sandbox` with `PAYMENTS_ENABLED_PROVIDERS=stripe,razorpay`. Stripe supports GBP and INR test checkout; Razorpay requires INR. PayPal stays unavailable until its sandbox credentials are configured. A visible test-checkout notice distinguishes these flows from real payments. Production never enables the in-process mock adapter, and test keys do not enable live payments. Student test access and E2E bypass routes remain disabled.
+
+`PAYMENT_RETURN_BASE_URL` points to the deployed application. Stripe test events are delivered to `/api/webhooks/payments/stripe` using that endpoint's private signing secret. Payment status still comes from signed events or server-side provider verification, never from a browser return URL. Turnstile remains enabled, with the deployed hostname checked during verification. Checkout and payment-return pages bypass the offline service worker so a cached shell cannot substitute for their current network response. Browser-native installation is retained without suppressing its install prompt.
 
 ## Verification
 
@@ -147,6 +149,7 @@ The project includes Playwright coverage for marketplace workflows, payment APIs
 npm run check
 npm run build
 npm run qa:links
+npm run qa:checkout
 ```
 
 Focused browser suites require a running application and an isolated, prepared database:

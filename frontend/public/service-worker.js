@@ -1,4 +1,4 @@
-const CACHE_NAME = "agriconnect-static-v2";
+const CACHE_NAME = "agriconnect-static-v3";
 const APP_SHELL = [
   "/",
   "/manifest.json",
@@ -30,7 +30,11 @@ self.addEventListener("fetch", (event) => {
   const { request } = event;
   const url = new URL(request.url);
 
-  if (request.method !== "GET" || url.origin !== self.location.origin || url.pathname.startsWith("/api/")) {
+  // Checkout and provider-return pages must always use the current network
+  // response. An old offline app shell cannot represent payment availability
+  // or a verified payment result, and must not manufacture their 503 response.
+  const paymentNavigation = /^\/(?:checkout|payment)(?:\/|$)/.test(url.pathname);
+  if (request.method !== "GET" || url.origin !== self.location.origin || url.pathname.startsWith("/api/") || paymentNavigation) {
     return;
   }
 

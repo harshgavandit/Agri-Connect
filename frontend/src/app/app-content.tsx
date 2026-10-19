@@ -14,7 +14,6 @@ const ProfileWizard = lazy(() => import("@/components/profile-wizard").then((mod
 const CompareBar = lazy(() => import("@/components/compare-bar").then((module) => ({ default: module.CompareBar })));
 const AccessibilityToolbar = lazy(() => import("@/components/accessibility-toolbar").then((module) => ({ default: module.AccessibilityToolbar })));
 const CookieConsentBanner = lazy(() => import("@/components/cookie-consent-banner").then((module) => ({ default: module.CookieConsentBanner })));
-const InstallPrompt = lazy(() => import("@/components/install-prompt").then((module) => ({ default: module.InstallPrompt })));
 
 const RTL_LANGS = new Set(["ar", "ur", "fa", "he"]);
 
@@ -59,7 +58,6 @@ function GlobalOverlays() {
       <AccessibilityToolbar />
       <AIChatAssistant />
       <CookieConsentBanner />
-      <InstallPrompt />
     </Suspense>
   );
 }

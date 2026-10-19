@@ -20,5 +20,6 @@ jobs:
       - run: npm ci
       - run: npm run check
       - run: npm run qa:ai
+      - run: npm run qa:checkout
       - run: npm run qa:links
       - run: npm run build

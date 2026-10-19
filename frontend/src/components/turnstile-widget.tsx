@@ -12,7 +12,7 @@ declare global {
           theme?: "auto" | "light" | "dark";
           callback(token: string): void;
           "expired-callback"(): void;
-          "error-callback"(): void;
+          "error-callback"(): boolean;
         },
       ): string;
       remove(widgetId: string): void;
@@ -88,6 +88,8 @@ export function TurnstileWidget({
           "error-callback": () => {
             onTokenChange("");
             setStatus("error");
+            // The widget error is handled in the visible checkout status.
+            return true;
           },
         });
       })

@@ -37,7 +37,9 @@ type FunctionalMethod = "stripe" | "cash" | "razorpay" | "paypal";
 type OnlineMethod = Exclude<FunctionalMethod, "cash">;
 
 const reasonMessages: Record<string, string> = {
-  provider_not_enabled: "Card payments are currently unavailable.",
+  provider_not_enabled: "This payment method is not enabled.",
+  mock_not_available: "Online payments are not configured for this deployment.",
+  real_provider_requires_sandbox_or_live_mode: "Online payments are not configured for this deployment.",
   provider_not_activated: "Card payment setup is not complete.",
   provider_webhook_unverified: "Card payment verification is not complete.",
   razorpay_inr_only: "Razorpay is available for INR checkout only.",
@@ -76,7 +78,9 @@ function MethodRow({
   badge?: string;
 }) {
   const available = method?.available === true;
-  const message = method?.reasonCode ? reasonMessages[method.reasonCode] : undefined;
+  const message = method?.reasonCode
+    ? reasonMessages[method.reasonCode] ?? "This payment method is unavailable for this checkout."
+    : undefined;
   return (
     <label
       className={`flex min-h-24 gap-4 rounded-2xl border-2 p-5 transition-all sm:min-h-28 sm:p-6 ${
@@ -328,6 +332,11 @@ export default function CheckoutPaymentPage() {
           <p className="mt-2 text-base sm:text-lg font-bold text-foreground/85">
             Choose how you want to pay.
           </p>
+          {methodsQuery.data?.mode === "sandbox" && (
+            <p className="mt-3 rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-950" role="status">
+              Test checkout: use payment-provider test details. No real money is charged.
+            </p>
+          )}
         </div>
 
         <div className="grid items-start gap-8 lg:grid-cols-3">

@@ -23,3 +23,9 @@ playwright-report/
 *.tsbuildinfo
 security-scans/
 .codex-worktrees/
+.agents/
+
+# Preserve local design material without publishing private working documents.
+AgriConnect-Agents_Guide/*
+!AgriConnect-Agents_Guide/AGENTS.md
+!AgriConnect-Agents_Guide/ENV_GUIDE.md

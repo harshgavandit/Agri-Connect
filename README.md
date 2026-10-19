@@ -4,7 +4,9 @@
 
 Built with **React, TypeScript, Express, and PostgreSQL**, AgriConnect explores how a marketplace can support the people around agriculture, from individual buyers and sellers to students, regional organisations, and platform operators.
 
-[Explore the source](https://github.com/harshgavandit/Agri-Connect) · [Project origins](https://github.com/c-PRESENTS/Agri-Connect)
+[Live application](https://agri-connect-flame.vercel.app) · [Explore the source](https://github.com/harshgavandit/Agri-Connect) · [Project origins](https://github.com/c-PRESENTS/Agri-Connect)
+
+[![CI](https://github.com/harshgavandit/Agri-Connect/actions/workflows/ci.yml/badge.svg)](https://github.com/harshgavandit/Agri-Connect/actions/workflows/ci.yml)
 
 ## Why this project exists
 
@@ -130,6 +132,12 @@ The tracked `vercel.json` configures a production build, `dist/public` static ou
 **Hosting boundaries:** Vercel functions do not run the application's periodic monitors reliably. This release disables those in-process timers on Vercel; scheduled reconciliation, provider review, maintenance, and opportunity scanning need a separate persistent worker or authenticated scheduled jobs. Seller document uploads currently use filesystem storage and need durable object storage before real verification documents are accepted. Process-local rate limits do not provide a global distributed limit across function instances.
 
 The data-centre backup screens include prototype behaviour; they do not establish that a recoverable external backup exists. Do not use this deployment for real financial operations, sensitive verification documents, or disaster recovery without completing those integrations and validating their controls.
+
+### Public deployment configuration
+
+The public instance uses a separate hosted database with no copied local users or orders. Google sign-in, Stripe test keys, Razorpay test keys, Vonage SMS, and Turnstile configuration are supplied privately through Vercel. Domain allowlists and provider callback configuration must be completed in the corresponding provider consoles before those external flows can be verified. Blank AI provider keys are not a configured AI service.
+
+Payment execution remains in `PAYMENTS_MODE=mock`. The internal mock adapter intentionally rejects checkout in production, so stored test gateway credentials do not activate payment processing. A later, explicitly authorised sandbox activation is required to exercise Stripe or Razorpay on the hosted site. Student test access and E2E bypass routes remain disabled.
 
 ## Verification
 

@@ -10,6 +10,7 @@
     "start": "node --env-file=.env -e \"process.env.NODE_ENV='production';require('./dist/index.cjs')\"",
     "check": "tsc",
     "qa:links": "node scripts/qa-static-links.mjs",
+    "qa:ai": "node --import tsx --test tests/unit/ai-assistant.test.ts",
     "qa:foundation": "playwright test tests/e2e/security-accessibility.foundation.spec.ts",
     "qa:organisation": "playwright test tests/e2e/organisation-rbac-foundation.spec.ts tests/e2e/admin-portal-phase-2.spec.ts tests/e2e/admin-user-verification-phase-3.spec.ts tests/e2e/product-moderation-phase-4.spec.ts tests/e2e/category-management-phase-5.spec.ts tests/e2e/employee-security-phase-6.spec.ts tests/e2e/organisation-control-centre.spec.ts",
     "qa:payments": "playwright test tests/e2e/payment-api.spec.ts",

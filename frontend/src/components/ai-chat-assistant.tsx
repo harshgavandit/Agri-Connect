@@ -12,6 +12,7 @@ interface Message {
   id: string;
   role: "user" | "assistant";
   content: string;
+  contextEligible?: boolean;
 }
 
 export function AIChatAssistant() {
@@ -30,7 +31,8 @@ export function AIChatAssistant() {
 
   useEffect(() => {
     if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+      const viewport = scrollRef.current.querySelector<HTMLElement>("[data-radix-scroll-area-viewport]");
+      if (viewport) viewport.scrollTop = viewport.scrollHeight;
     }
   }, [messages]);
 
@@ -60,8 +62,9 @@ export function AIChatAssistant() {
 
     try {
       const conversationHistory = messages
-        .filter((m) => m.id !== "welcome")
-        .map((m) => ({ role: m.role, content: m.content }));
+        .filter((m) => m.id !== "welcome" && !m.id.startsWith("error-") && m.contextEligible !== false)
+        .slice(-12)
+        .map((m) => ({ role: m.role, content: m.content.slice(0, 4000) }));
 
       const response = await apiRequest("POST", "/api/chat", {
         message: userMessage.content,
@@ -74,11 +77,11 @@ export function AIChatAssistant() {
         id: `assistant-${Date.now()}`,
         role: "assistant",
         content: data.reply || t("chat.no_response"),
+        contextEligible: data.available !== false,
       };
 
       setMessages((prev) => [...prev, assistantMessage]);
     } catch (error: any) {
-      console.error("Chat error:", error);
       const status = error?.status ?? (typeof error?.message === "string" && error.message.match(/^(\d{3}):/)?.[1]);
       let content = t("chat.error_generic");
       if (status === 401 || String(error?.message || "").includes("401")) {
@@ -87,11 +90,18 @@ export function AIChatAssistant() {
         content = t("chat.error_rate_limit");
       } else if (String(error?.message || "").toLowerCase().includes("failed to fetch")) {
         content = t("chat.error_network");
+      } else {
+        // The API returns a safe user-facing message, without provider details.
+        try {
+          const body = JSON.parse(String(error?.message || "").replace(/^\d{3}:\s*/, ""));
+          if (typeof body.error === "string") content = body.error;
+        } catch { /* retain the translated generic message */ }
       }
       const errorMessage: Message = {
         id: `error-${Date.now()}`,
         role: "assistant",
         content,
+        contextEligible: false,
       };
       setMessages((prev) => [...prev, errorMessage]);
     } finally {
@@ -216,6 +226,7 @@ export function AIChatAssistant() {
               <div className="flex gap-2">
                 <Input
                   value={input}
+                  maxLength={1000}
                   onChange={(e) => setInput(e.target.value)}
                   onKeyPress={handleKeyPress}
                   placeholder={t("chat.placeholder")}

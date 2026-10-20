@@ -17,6 +17,13 @@ import { SiFacebook, SiInstagram, SiX } from "react-icons/si";
 import { Link } from "wouter";
 import { COOKIE_SETTINGS_HASH } from "@/lib/cookie-consent";
 
+const socialLinks = [
+  { icon: SiFacebook, label: "Facebook", href: "https://www.facebook.com/agriconne" },
+  { icon: SiX, label: "X", href: "https://x.com/agriconnectx" },
+  { icon: SiInstagram, label: "Instagram", href: "https://www.instagram.com/agriconnectx" },
+  { icon: FaLinkedinIn, label: "LinkedIn", href: "https://www.linkedin.com/showcase/theagriconnectxsummit/home/" },
+];
+
 const trustBadges = [
   {
     icon: Shield,
@@ -163,9 +170,11 @@ export const TrustIndicators = memo(function TrustIndicators() {
                 Connecting farmers directly with customers for fresher produce and fairer prices.
               </p>
               <div className="flex gap-3 pt-1">
-                {[SiFacebook, SiX, SiInstagram, FaLinkedinIn].map((Icon, i) => (
-                  <Button key={i} variant="outline" size="icon" className="h-10 w-10 sm:h-11 sm:w-11 rounded-xl border-2 border-border/80 hover:border-primary hover:bg-primary/10 shadow-2xs transition-transform hover:scale-105">
-                    <Icon className="h-5 w-5 text-foreground" />
+                {socialLinks.map(({ icon: Icon, label, href }) => (
+                  <Button asChild key={label} variant="outline" size="icon" className="h-10 w-10 sm:h-11 sm:w-11 rounded-xl border-2 border-border/80 hover:border-primary hover:bg-primary/10 shadow-2xs transition-transform hover:scale-105">
+                    <a href={href} target="_blank" rel="noopener noreferrer" aria-label={`Visit AgriConnect on ${label} (opens in a new tab)`}>
+                      <Icon className="h-5 w-5 text-foreground" aria-hidden="true" />
+                    </a>
                   </Button>
                 ))}
               </div>

@@ -6,6 +6,7 @@ import { AppContent } from "@/app/app-content";
 import "@/i18n/index";
 import { CurrencyProvider } from "@/contexts/currency-context";
 import { LiveLocationProvider } from "@/contexts/live-location-context";
+import { WebAnalytics } from "@/components/web-analytics";
 
 function App() {
   return (
@@ -15,6 +16,7 @@ function App() {
           <LiveLocationProvider>
             <TooltipProvider>
               <AppContent />
+              <WebAnalytics />
             </TooltipProvider>
           </LiveLocationProvider>
         </CurrencyProvider>

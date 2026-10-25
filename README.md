@@ -101,7 +101,9 @@ npm run build
 ## Scope and deployment
 
 - Hosted frontend/API routing is defined in [`vercel.json`](vercel.json). Configure credentials privately in the hosting environment; `.env` must not be committed.
+- AI request limits in [`backend/routes.ts`](backend/routes.ts) use process-local memory. They protect one running instance, not a shared deployment-wide usage budget. Use a shared admission store before relying on them to cap provider traffic across multiple instances.
+- [`backend/index.ts`](backend/index.ts) disables persistent maintenance timers on Vercel. Payment reconciliation, provider reviews, retention and opportunity monitoring need a separately scheduled worker there; the checked-in Vercel configuration does not schedule one.
 - AI answers use a bounded marketplace sample and are not a complete inventory guarantee. The assistant cannot confirm transactions or perform account mutations.
 - Checkout is in test mode. Real payment processing, seller payouts and external logistics require provider activation and independent operational acceptance.
 
-Original project: [c-PRESENTS/Agri-Connect](https://github.com/c-PRESENTS/Agri-Connect).
+Original project: [c-PRESENTS/Agri-Connect](https://github.com/c-PRESENTS/Agri-Connect). For private vulnerability reports, see [the security policy](SECURITY.md).
